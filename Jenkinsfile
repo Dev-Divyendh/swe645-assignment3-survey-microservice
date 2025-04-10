@@ -9,18 +9,19 @@ pipeline {
         DOCKER_CREDENTIALS = 'jenkins-credentials'  // Docker Hub credentials ID (updated to match your Docker credentials ID)
     }
 
-
     stages {
         stage('Docker Test') {
+            agent any  // Define an agent for this stage
             steps {
                 script {
-                     sh 'docker --version'
-                     sh 'docker ps'
-                     sh 'docker run --rm hello-world'
-                     sh 'docker info'
-                 }
+                    sh 'docker --version'
+                    sh 'docker ps'
+                    sh 'docker run --rm hello-world'
+                    sh 'docker info'
+                }
             }
         }
+
         stage('Checkout Code') {
             agent any  // This will run on any available agent
             steps {
@@ -32,6 +33,7 @@ pipeline {
         }
 
         stage('Build JAR') {
+            agent any  // Define an agent for this stage as well
             steps {
                 script {
                     docker.image('maven:3.9.6-eclipse-temurin-17').inside('-v /var/run/docker.sock:/var/run/docker.sock') {
@@ -45,6 +47,7 @@ pipeline {
         }
 
         stage('Build Docker Image') {
+            agent any  // Define an agent for this stage
             steps {
                 script {
                     docker.image('maven:3.9.6-eclipse-temurin-17').inside('-v /var/run/docker.sock:/var/run/docker.sock') {
