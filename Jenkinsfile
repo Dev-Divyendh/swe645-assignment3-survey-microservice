@@ -36,7 +36,7 @@ pipeline {
             agent any  // Define an agent for this stage as well
             steps {
                 script {
-                    docker.image('maven:3.9.6-eclipse-temurin-17').inside('-v /var/run/docker.sock:/var/run/docker.sock') {
+                    docker.image('maven:3.9.6-eclipse-temurin-17').inside('-v /var/run/docker.sock:/var/run/docker.sock -u root') {  // Run as root
                         sh '''
                             chmod +x ./mvnw
                             ./mvnw clean package -DskipTests
@@ -45,6 +45,7 @@ pipeline {
                 }
             }
         }
+
 
         stage('Build Docker Image') {
             agent any  // Define an agent for this stage
