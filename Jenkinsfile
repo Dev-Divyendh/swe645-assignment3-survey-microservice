@@ -16,7 +16,8 @@ pipeline {
                 script {
                      sh 'docker --version'
                      sh 'docker ps'
-                     sh 'docker run hello-world'
+                     sh 'docker run --rm hello-world'
+                     sh 'docker info'
                  }
             }
         }
