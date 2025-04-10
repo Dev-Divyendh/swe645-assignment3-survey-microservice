@@ -5,8 +5,8 @@ pipeline {
         AWS_REGION = 'us-east-2'
         ECR_REPO = '585008073814.dkr.ecr.us-east-2.amazonaws.com/swe645-survey-app'
         IMAGE_TAG = 'latest'
-        GITHUB_CREDENTIALS = 'github-credentials'  // Your GitHub credentials ID
-        DOCKER_CREDENTIALS = 'docker-hub-credentials'  // Your Docker Hub credentials ID
+        GITHUB_CREDENTIALS = 'github-credentials'  // GitHub credentials ID
+        DOCKER_CREDENTIALS = 'jenkins-credentials'  // Docker Hub credentials ID (updated to match your Docker credentials ID)
     }
 
     stages {
@@ -51,7 +51,7 @@ pipeline {
             steps {
                 withAWS(region: "$AWS_REGION", credentials: 'aws-jenkins-creds') {
                     script {
-                        // Use Docker Hub credentials for login
+                        // Use Docker credentials for login to Docker Hub and ECR
                         docker.withRegistry('https://index.docker.io/v1/', DOCKER_CREDENTIALS) {
                             sh '''
                                 aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REPO
