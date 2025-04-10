@@ -19,7 +19,6 @@ pipeline {
             steps {
                 script {
                     docker.image('maven:3.9.6-eclipse-temurin-17').inside('-v /var/run/docker.sock:/var/run/docker.sock') {
-                        // Inside the Docker container, we will run the following Maven build commands
                         sh '''
                             chmod +x ./mvnw
                             ./mvnw clean package -DskipTests
@@ -33,9 +32,8 @@ pipeline {
             steps {
                 script {
                     docker.image('maven:3.9.6-eclipse-temurin-17').inside('-v /var/run/docker.sock:/var/run/docker.sock') {
-                        // Inside the Docker container, we will run Docker commands to build the image
                         sh '''
-                            docker --version  // Verify Docker is installed
+                            docker --version
                             docker build -t $ECR_REPO:$IMAGE_TAG .
                         '''
                     }
