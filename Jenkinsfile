@@ -5,13 +5,18 @@ pipeline {
         AWS_REGION = 'us-east-2'
         ECR_REPO = '585008073814.dkr.ecr.us-east-2.amazonaws.com/swe645-survey-app'
         IMAGE_TAG = 'latest'
+        GITHUB_CREDENTIALS = 'github-credentials'  // Your GitHub credentials ID
+        DOCKER_CREDENTIALS = 'docker-hub-credentials'  // Your Docker Hub credentials ID
     }
 
     stages {
         stage('Checkout Code') {
             agent any  // This will run on any available agent
             steps {
-                git branch: 'main', url: 'https://github.com/Dev-Divyendh/swe645-assignment3-survey-microservice.git'
+                script {
+                    // Checkout code using GitHub credentials
+                    git credentialsId: GITHUB_CREDENTIALS, branch: 'main', url: 'https://github.com/Dev-Divyendh/swe645-assignment3-survey-microservice.git'
+                }
             }
         }
 
@@ -45,10 +50,15 @@ pipeline {
             agent any  // This can run on any agent
             steps {
                 withAWS(region: "$AWS_REGION", credentials: 'aws-jenkins-creds') {
-                    sh '''
-                        aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REPO
-                        docker push $ECR_REPO:$IMAGE_TAG
-                    '''
+                    script {
+                        // Use Docker Hub credentials for login
+                        docker.withRegistry('https://index.docker.io/v1/', DOCKER_CREDENTIALS) {
+                            sh '''
+                                aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REPO
+                                docker push $ECR_REPO:$IMAGE_TAG
+                            '''
+                        }
+                    }
                 }
             }
         }
