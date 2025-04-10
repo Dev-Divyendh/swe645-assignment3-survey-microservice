@@ -18,7 +18,7 @@ pipeline {
         stage('Build JAR') {
             agent {
                 docker {
-                    image 'maven:3.9.6-eclipse-temurin-17'  // Image that has Java 17 and Maven
+                    image 'maven:3.9.6-eclipse-temurin-17'  // Image with Maven and Java 17
                     args '-v /var/run/docker.sock:/var/run/docker.sock'  // Mount Docker socket for Docker CLI
                 }
             }
@@ -33,17 +33,18 @@ pipeline {
         stage('Build Docker Image') {
             agent {
                 docker {
-                    image 'maven:3.9.6-eclipse-temurin-17'  // Image that has Docker CLI and Maven
+                    image 'maven:3.9.6-eclipse-temurin-17'  // Maven image with Docker support
                     args '-v /var/run/docker.sock:/var/run/docker.sock'  // Mount Docker socket for Docker CLI
                 }
             }
             steps {
-                sh '''
-                    apt-get update
-                    apt-get install -y docker.io  // Install Docker CLI inside container
-                    docker --version  // Verify Docker is installed
-                    docker build -t $ECR_REPO:$IMAGE_TAG .
-                '''
+                script {
+                    // Inside the Docker container, Docker commands will be run
+                    sh '''
+                        docker --version  // Verify Docker is installed
+                        docker build -t $ECR_REPO:$IMAGE_TAG .
+                    '''
+                }
             }
         }
 
