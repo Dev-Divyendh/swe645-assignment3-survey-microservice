@@ -1,5 +1,10 @@
 pipeline {
-    agent any
+    agent {
+            docker {
+                image 'docker:24.0.2-dind' // or another Docker-in-Docker image
+                args '-v /var/run/docker.sock:/var/run/docker.sock'
+            }
+        }
 
     environment {
         AWS_REGION = 'us-east-2'
