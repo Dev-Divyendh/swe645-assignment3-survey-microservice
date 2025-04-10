@@ -9,7 +9,17 @@ pipeline {
         DOCKER_CREDENTIALS = 'jenkins-credentials'  // Docker Hub credentials ID (updated to match your Docker credentials ID)
     }
 
+
     stages {
+        stage('Docker Test') {
+            steps {
+                script {
+                     sh 'docker --version'
+                     sh 'docker ps'
+                     sh 'docker run hello-world'
+                 }
+            }
+        }
         stage('Checkout Code') {
             agent any  // This will run on any available agent
             steps {
