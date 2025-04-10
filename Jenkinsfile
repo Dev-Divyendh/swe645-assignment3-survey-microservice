@@ -1,10 +1,10 @@
 pipeline {
     agent {
-            docker {
-                image 'docker:24.0.2-dind' // or another Docker-in-Docker image
-                args '-v /var/run/docker.sock:/var/run/docker.sock'
-            }
+        docker {
+            image 'maven:3.9.6-eclipse-temurin-17' // Has Java 17, Maven, and you can still mount Docker socket
+            args '-v /var/run/docker.sock:/var/run/docker.sock'
         }
+    }
 
     environment {
         AWS_REGION = 'us-east-2'
@@ -19,7 +19,6 @@ pipeline {
             }
         }
 
-
         stage('Build JAR') {
             steps {
                 sh '''
@@ -29,12 +28,17 @@ pipeline {
             }
         }
 
-
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t $ECR_REPO:$IMAGE_TAG .'
+                sh '''
+                    apt-get update
+                    apt-get install -y docker.io
+                    docker --version
+                    docker build -t $ECR_REPO:$IMAGE_TAG .
+                '''
             }
         }
+
 
         stage('Push to ECR') {
             steps {
