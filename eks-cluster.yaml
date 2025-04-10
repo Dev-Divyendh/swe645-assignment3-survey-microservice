@@ -1,0 +1,15 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: swe645-cluster
+  region: us-east-2
+  version: "1.29"
+
+nodeGroups:
+  - name: swe645-nodes-new
+    instanceType: t3.micro
+    minSize: 1
+    desiredCapacity: 3
+    maxSize: 3
+    volumeSize: 20

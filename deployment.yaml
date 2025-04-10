@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: survey-app-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: survey-app
+  template:
+    metadata:
+      labels:
+        app: survey-app
+    spec:
+      containers:
+        - name: survey-app
+          image: 585008073814.dkr.ecr.us-east-2.amazonaws.com/swe645-survey-app:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:mysql://swe645db.c76o4i0qm7ma.us-east-2.rds.amazonaws.com:3306/surveydb?useSSL=false&serverTimezone=UTC
+            - name: SPRING_DATASOURCE_USERNAME
+              value: admin
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: veD10%03_01
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: survey-app-service
+spec:
+  selector:
+    app: survey-app
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
+  type: LoadBalancer
