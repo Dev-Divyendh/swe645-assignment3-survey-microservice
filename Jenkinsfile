@@ -1,10 +1,5 @@
 pipeline {
-    agent {
-        docker {
-            image 'maven:3.9.6-eclipse-temurin-17' // Has Java 17, Maven, and you can still mount Docker socket
-            args '-v /var/run/docker.sock:/var/run/docker.sock'
-        }
-    }
+    agent none  // No agent at the top level
 
     environment {
         AWS_REGION = 'us-east-2'
@@ -14,12 +9,19 @@ pipeline {
 
     stages {
         stage('Checkout Code') {
+            agent any  // This will run on any available agent
             steps {
                 git branch: 'main', url: 'https://github.com/Dev-Divyendh/swe645-assignment3-survey-microservice.git'
             }
         }
 
         stage('Build JAR') {
+            agent {
+                docker {
+                    image 'maven:3.9.6-eclipse-temurin-17'  // Image that has Java 17 and Maven
+                    args '-v /var/run/docker.sock:/var/run/docker.sock'  // Mount Docker socket for Docker CLI
+                }
+            }
             steps {
                 sh '''
                     chmod +x ./mvnw
@@ -29,18 +31,24 @@ pipeline {
         }
 
         stage('Build Docker Image') {
+            agent {
+                docker {
+                    image 'maven:3.9.6-eclipse-temurin-17'  // Image that has Docker CLI and Maven
+                    args '-v /var/run/docker.sock:/var/run/docker.sock'  // Mount Docker socket for Docker CLI
+                }
+            }
             steps {
                 sh '''
                     apt-get update
-                    apt-get install -y docker.io
-                    docker --version
+                    apt-get install -y docker.io  // Install Docker CLI inside container
+                    docker --version  // Verify Docker is installed
                     docker build -t $ECR_REPO:$IMAGE_TAG .
                 '''
             }
         }
 
-
         stage('Push to ECR') {
+            agent any  // This can run on any agent
             steps {
                 withAWS(region: "$AWS_REGION", credentials: 'aws-jenkins-creds') {
                     sh '''
@@ -52,6 +60,7 @@ pipeline {
         }
 
         stage('Deploy to Kubernetes') {
+            agent any  // This can run on any agent
             steps {
                 sh 'kubectl apply -f deployment.yaml'
             }
