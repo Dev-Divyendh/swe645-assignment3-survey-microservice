@@ -16,34 +16,29 @@ pipeline {
         }
 
         stage('Build JAR') {
-            agent {
-                docker {
-                    image 'maven:3.9.6-eclipse-temurin-17'  // Image with Maven and Java 17
-                    args '-v /var/run/docker.sock:/var/run/docker.sock'  // Mount Docker socket for Docker CLI
-                }
-            }
             steps {
-                sh '''
-                    chmod +x ./mvnw
-                    ./mvnw clean package -DskipTests
-                '''
+                script {
+                    docker.image('maven:3.9.6-eclipse-temurin-17').inside('-v /var/run/docker.sock:/var/run/docker.sock') {
+                        // Inside the Docker container, we will run the following Maven build commands
+                        sh '''
+                            chmod +x ./mvnw
+                            ./mvnw clean package -DskipTests
+                        '''
+                    }
+                }
             }
         }
 
         stage('Build Docker Image') {
-            agent {
-                docker {
-                    image 'maven:3.9.6-eclipse-temurin-17'  // Maven image with Docker support
-                    args '-v /var/run/docker.sock:/var/run/docker.sock'  // Mount Docker socket for Docker CLI
-                }
-            }
             steps {
                 script {
-                    // Inside the Docker container, Docker commands will be run
-                    sh '''
-                        docker --version  // Verify Docker is installed
-                        docker build -t $ECR_REPO:$IMAGE_TAG .
-                    '''
+                    docker.image('maven:3.9.6-eclipse-temurin-17').inside('-v /var/run/docker.sock:/var/run/docker.sock') {
+                        // Inside the Docker container, we will run Docker commands to build the image
+                        sh '''
+                            docker --version  // Verify Docker is installed
+                            docker build -t $ECR_REPO:$IMAGE_TAG .
+                        '''
+                    }
                 }
             }
         }
