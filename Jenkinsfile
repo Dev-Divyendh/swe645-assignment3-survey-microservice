@@ -10,9 +10,10 @@ pipeline {
     stages {
         stage('Checkout Code') {
             steps {
-                git 'https://github.com/Dev-Divyendh/swe645-assignment3-survey-microservice.git'
+                git branch: 'main', url: 'https://github.com/Dev-Divyendh/swe645-assignment3-survey-microservice.git'
             }
         }
+
 
         stage('Build JAR') {
             steps {
